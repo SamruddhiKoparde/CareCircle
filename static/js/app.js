@@ -154,21 +154,6 @@ function setupLoginModes() {
 
     form.insertBefore(modeSelector, emailLabel);
 
-    const patientIdLabel = document.createElement("label");
-    patientIdLabel.htmlFor = "loginPatientId";
-    patientIdLabel.textContent = "Patient account ID";
-    patientIdLabel.className = "member-login-field hidden";
-
-    const patientIdInput = document.createElement("input");
-    patientIdInput.id = "loginPatientId";
-    patientIdInput.type = "number";
-    patientIdInput.min = "1";
-    patientIdInput.placeholder = "Enter the patient's account ID";
-    patientIdInput.className = "member-login-field hidden";
-
-    form.insertBefore(patientIdLabel, emailLabel);
-    form.insertBefore(patientIdInput, emailLabel);
-
     modeSelector.addEventListener("click", (event) => {
         const button = event.target.closest("[data-mode]");
         if (!button) return;
@@ -178,12 +163,6 @@ function setupLoginModes() {
         modeSelector.querySelectorAll("button").forEach((item) => {
             item.classList.toggle("active", item === button);
         });
-
-        const isMember = state.loginMode === "member";
-
-        patientIdLabel.classList.toggle("hidden", !isMember);
-        patientIdInput.classList.toggle("hidden", !isMember);
-        patientIdInput.required = isMember;
     });
 }
 
@@ -201,19 +180,9 @@ async function handleLogin(event) {
 
     try {
         if (state.loginMode === "member") {
-            const patientId = Number($("#loginPatientId").value);
-
-            if (!Number.isInteger(patientId) || patientId <= 0) {
-                throw new Error("Enter a valid patient account ID.");
-            }
-
             await api("/auth/member-login", {
                 method: "POST",
-                body: {
-                    email,
-                    passcode,
-                    patient_id: patientId
-                }
+                body: { email, passcode }
             });
         } else {
             await api("/auth/login", {
@@ -229,6 +198,99 @@ async function handleLogin(event) {
     } finally {
         button.disabled = false;
         button.innerHTML = 'Sign in <span aria-hidden="true">→</span>';
+    }
+}
+async function handleAcceptInvitation(event) {
+    event.preventDefault();
+
+    const invitationToken = $("#invitationCode").value.trim();
+    const email = $("#invitationEmail").value.trim();
+    const passcode = $("#invitationPasscode").value;
+
+    const error = $("#invitationError");
+    const button = $("#acceptInvitationButton");
+
+    error.textContent = "";
+    button.disabled = true;
+    button.textContent = "Accepting invitation...";
+
+    try {
+        await api("/auth/members/accept-invitation", {
+            method: "POST",
+            body: {
+                invitation_token: invitationToken,
+                email: email,
+                passcode: passcode
+            }
+        });
+
+        $("#acceptInvitationForm").reset();
+        $("#acceptInvitationForm").classList.add("hidden");
+        $("#loginForm").classList.remove("hidden");
+
+        state.loginMode = "member";
+
+        const memberModeButton = document.querySelector(
+            '.login-mode[data-mode="member"]'
+        );
+
+        if (memberModeButton) {
+            memberModeButton.click();
+        }
+
+        $("#loginEmail").value = email;
+        $("#loginPasscode").value = "";
+
+        $("#loginError").textContent =
+            "Invitation accepted successfully. Please sign in.";
+
+    } catch (error) {
+        error.textContent = error.message;
+    } finally {
+        button.disabled = false;
+        button.textContent = "Accept invitation →";
+    }
+}
+
+async function handleRegister(event) {
+    event.preventDefault();
+
+    const fullName = $("#registerName").value.trim();
+    const email = $("#registerEmail").value.trim();
+    const passcode = $("#registerPasscode").value;
+
+    const error = $("#registerError");
+    const button = $("#registerButton");
+
+    error.textContent = "";
+    button.disabled = true;
+    button.textContent = "Creating account...";
+
+    try {
+        await api("/auth/register", {
+            method: "POST",
+            body: {
+                full_name: fullName,
+                email: email,
+                passcode: passcode
+            }
+        });
+
+        $("#loginEmail").value = email;
+        $("#loginPasscode").value = "";
+        $("#registerForm").reset();
+
+        $("#registerForm").classList.add("hidden");
+        $("#loginForm").classList.remove("hidden");
+
+        $("#loginError").textContent =
+            "Account created successfully! Please sign in.";
+
+    } catch (error) {
+        error.textContent = error.message;
+    } finally {
+        button.disabled = false;
+        button.innerHTML = 'Create account <span aria-hidden="true">→</span>';
     }
 }
 
@@ -373,8 +435,8 @@ async function loadDashboard() {
 
     const greeting =
         hour < 12 ? "Good morning" :
-        hour < 17 ? "Good afternoon" :
-        "Good evening";
+            hour < 17 ? "Good afternoon" :
+                "Good evening";
 
     $("#greeting").textContent =
         `${greeting}, ${data.patient?.full_name || state.user.name}`;
@@ -414,21 +476,21 @@ async function loadMedications() {
     ]);
 
     state.medications = (medicationResult.medications || []).map((medication) => {
-    let scheduleTimes = medication.schedule_times || [];
+        let scheduleTimes = medication.schedule_times || [];
 
-    if (typeof scheduleTimes === "string") {
-        try {
-            scheduleTimes = JSON.parse(scheduleTimes);
-        } catch {
-            scheduleTimes = [];
+        if (typeof scheduleTimes === "string") {
+            try {
+                scheduleTimes = JSON.parse(scheduleTimes);
+            } catch {
+                scheduleTimes = [];
+            }
         }
-    }
 
-    return {
-        ...medication,
-        schedule_times: Array.isArray(scheduleTimes) ? scheduleTimes : []
-    };
-});
+        return {
+            ...medication,
+            schedule_times: Array.isArray(scheduleTimes) ? scheduleTimes : []
+        };
+    });
     state.doses = doseResult.doses || [];
 
     renderMedicationTable();
@@ -475,21 +537,19 @@ function renderTodayMedications(doses) {
                     <span class="status-badge ${statusClass(dose.status)}">
                         ${escapeHTML(statusLabel(dose.status))}
                     </span>
-                    ${
-                        dose.confirmed_by_name
-                            ? `<small>Reported by ${escapeHTML(dose.confirmed_by_name)}</small>`
-                            : ""
-                    }
+                    ${dose.confirmed_by_name
+                ? `<small>Reported by ${escapeHTML(dose.confirmed_by_name)}</small>`
+                : ""
+            }
                 </div>
 
-                ${
-                    canConfirm
-                        ? `<button class="btn btn-secondary dose-confirm-button"
+                ${canConfirm
+                ? `<button class="btn btn-secondary dose-confirm-button"
                                    data-dose-id="${dose.id}">
                                 Confirm
                            </button>`
-                        : ""
-                }
+                : ""
+            }
             </div>
         `;
     }).join("");
@@ -528,21 +588,20 @@ function renderMedicationTable() {
                         </td>
                         <td>${escapeHTML(medication.dosage)}</td>
                         <td>${(medication.schedule_times || [])
-                            .map(escapeHTML).join(", ")}</td>
+            .map(escapeHTML).join(", ")}</td>
                         <td>
                             <span class="status-badge ${medication.is_active ? "taken" : "missed"}">
                                 ${medication.is_active ? "Active" : "Inactive"}
                             </span>
                         </td>
                         <td>
-                            ${
-                                state.user.role === "patient" && medication.is_active
-                                    ? `<button class="text-button deactivate-medication"
+                            ${state.user.role === "patient" && medication.is_active
+            ? `<button class="text-button deactivate-medication"
                                                data-id="${medication.id}">
                                             Deactivate
                                        </button>`
-                                    : "—"
-                            }
+            : "—"
+        }
                         </td>
                     </tr>
                 `).join("")}
@@ -709,21 +768,19 @@ function renderAppointmentCard(appointment, allowCancel = false) {
                 <small>${escapeHTML(appointment.specialty || "Medical appointment")}</small>
                 <small>${formatDateTime(appointment.appointment_at)}</small>
                 <small>${escapeHTML(appointment.location || "")}</small>
-                ${
-                    appointment.notes
-                        ? `<small>${escapeHTML(appointment.notes)}</small>`
-                        : ""
-                }
+                ${appointment.notes
+            ? `<small>${escapeHTML(appointment.notes)}</small>`
+            : ""
+        }
             </div>
 
-            ${
-                allowCancel && appointment.status !== "cancelled"
-                    ? `<button class="text-button cancel-appointment"
+            ${allowCancel && appointment.status !== "cancelled"
+            ? `<button class="text-button cancel-appointment"
                                data-id="${appointment.id}">
                             Cancel
                        </button>`
-                    : ""
-            }
+            : ""
+        }
         </div>
     `;
 }
@@ -916,12 +973,12 @@ function showInviteForm() {
             </p>
 
             ${permissionCheckboxes({
-                can_view_profile: true,
-                can_view_medications: true,
-                can_manage_medications: false,
-                can_confirm_doses: true,
-                can_manage_appointments: false
-            })}
+        can_view_profile: true,
+        can_view_medications: true,
+        can_manage_medications: false,
+        can_confirm_doses: true,
+        can_manage_appointments: false
+    })}
 
             <button class="btn btn-primary btn-full" type="submit">
                 Create invitation
@@ -1254,6 +1311,28 @@ function renderFullActivity(activities) {
 function setupEvents() {
     $("#loginForm").addEventListener("submit", handleLogin);
 
+    $("#registerForm").addEventListener("submit", handleRegister);
+    $("#acceptInvitationForm").addEventListener("submit", handleAcceptInvitation);
+
+    $("#showRegisterButton").addEventListener("click", () => {
+        $("#loginForm").classList.add("hidden");
+        $("#registerForm").classList.remove("hidden");
+    });
+
+    $("#showLoginButton").addEventListener("click", () => {
+        $("#registerForm").classList.add("hidden");
+        $("#loginForm").classList.remove("hidden");
+    });
+    $("#showInvitationButton").addEventListener("click", () => {
+        $("#loginForm").classList.add("hidden");
+        $("#registerForm").classList.add("hidden");
+        $("#acceptInvitationForm").classList.remove("hidden");
+    });
+
+    $("#showLoginFromInvitationButton").addEventListener("click", () => {
+        $("#acceptInvitationForm").classList.add("hidden");
+        $("#loginForm").classList.remove("hidden");
+    });
     $("#logoutButton").addEventListener("click", logout);
 
     $("#closeModal").addEventListener("click", closeModal);

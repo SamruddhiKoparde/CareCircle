@@ -77,7 +77,6 @@ def login_patient(email: str, passcode: str, db: Session):
 def login_member(
     email: str,
     passcode: str,
-    patient_id: int,
     db: Session,
 ):
     """Authenticate an authorized family member or caretaker."""
@@ -86,7 +85,6 @@ def login_member(
     member = authenticate_member(
         email=email,
         passcode=passcode,
-        patient_id=patient_id,
         db=db,
     )
 

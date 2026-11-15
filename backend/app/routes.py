@@ -41,7 +41,6 @@ class PatientLoginRequest(BaseModel):
 class MemberLoginRequest(BaseModel):
     email: EmailStr
     passcode: str = Field(min_length=8, max_length=72)
-    patient_id: int = Field(gt=0)
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(
@@ -88,6 +87,7 @@ def patient_login(
     return {"message": "Login successful."}
 
 @router.post("/member-login")
+@router.post("/member-login")
 def member_login(
     payload: MemberLoginRequest,
     response: Response,
@@ -96,7 +96,6 @@ def member_login(
     token = login_member(
         email=str(payload.email),
         passcode=payload.passcode,
-        patient_id=payload.patient_id,
         db=db,
     )
 
@@ -167,6 +166,7 @@ def create_member_invitation(
 
 class AcceptInvitationRequest(BaseModel):
     invitation_token: str = Field(min_length=20, max_length=200)
+    email: EmailStr
     passcode: str = Field(min_length=8, max_length=72)
 
 @router.post("/members/accept-invitation")
@@ -176,12 +176,13 @@ def accept_member_invitation(
 ):
     result = accept_invitation(
         invitation_token=payload.invitation_token,
+        email=str(payload.email),
         passcode=payload.passcode,
         db=db,
     )
 
     return result
-
+    
 @router.get("/members")
 def get_members(
     db: Session = Depends(get_db),

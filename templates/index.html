@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,10 +9,14 @@
     <title>CareCircle | Connected Care</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
+
 
     <!-- Authentication -->
     <main id="authScreen" class="auth-screen">
@@ -28,24 +32,103 @@
                 <p>A calmer way to manage medication, appointments and the people who care.</p>
             </div>
 
+            <!-- Login form -->
             <form id="loginForm" class="auth-form">
                 <h2>Welcome back</h2>
                 <p>Sign in to your care account.</p>
 
                 <label for="loginEmail">Email address</label>
-                <input id="loginEmail" name="email" type="email"
-                    placeholder="you@example.com" autocomplete="username" required>
+                <input id="loginEmail" name="email" type="email" placeholder="you@example.com" autocomplete="username"
+                    required>
 
                 <label for="loginPasscode">Passcode</label>
-                <input id="loginPasscode" name="passcode" type="password"
-                    placeholder="Enter your passcode" autocomplete="current-password"
-                    minlength="8" required>
+                <input id="loginPasscode" name="passcode" type="password" placeholder="Enter your passcode"
+                    autocomplete="current-password" minlength="8" required>
 
                 <div id="loginError" class="form-error" role="alert"></div>
 
                 <button id="loginButton" class="btn btn-primary btn-full" type="submit">
                     Sign in <span aria-hidden="true">→</span>
                 </button>
+
+                <p class="auth-switch">
+                    New to CareCircle?
+                    <button type="button" id="showRegisterButton" class="text-button">
+                        Create patient account
+                    </button>
+                </p>
+
+                <p class="auth-switch">
+                    Invited to a care circle?
+                    <button type="button" id="showInvitationButton" class="text-button">
+                        Accept invitation
+                    </button>
+                </p>
+            </form>
+            
+                    <!-- Caretaker invitation acceptance -->
+        <form id="acceptInvitationForm" class="auth-form hidden">
+            <h2>Join a care circle</h2>
+            <p>Enter the invitation details shared by the patient.</p>
+
+            <label for="invitationCode">Invitation code</label>
+            <input id="invitationCode" name="invitation_token"
+                type="text" placeholder="Paste your invitation code"
+                autocomplete="off" required>
+
+            <label for="invitationEmail">Invited email address</label>
+            <input id="invitationEmail" name="email" type="email"
+                placeholder="you@example.com" autocomplete="email" required>
+
+            <label for="invitationPasscode">Create your passcode</label>
+            <input id="invitationPasscode" name="passcode" type="password"
+                placeholder="At least 8 characters" minlength="8"
+                maxlength="72" autocomplete="new-password" required>
+
+            <div id="invitationError" class="form-error" role="alert"></div>
+
+            <button id="acceptInvitationButton"
+                class="btn btn-primary btn-full" type="submit">
+                Accept invitation →
+            </button>
+
+            <p class="auth-switch">
+                Already accepted an invitation?
+                <button type="button" id="showLoginFromInvitationButton"
+                    class="text-button">
+                    Sign in
+                </button>
+            </p>
+        </form>
+            <!-- Registration form -->
+            <form id="registerForm" class="auth-form hidden">
+                <h2>Create your account</h2>
+                <p>Set up your personal CareCircle account.</p>
+
+                <label for="registerName">Full name</label>
+                <input id="registerName" name="full_name" type="text" placeholder="Your full name" minlength="2"
+                    maxlength="120" required>
+
+                <label for="registerEmail">Email address</label>
+                <input id="registerEmail" name="email" type="email" placeholder="you@example.com" autocomplete="email"
+                    required>
+
+                <label for="registerPasscode">Create passcode</label>
+                <input id="registerPasscode" name="passcode" type="password" placeholder="At least 8 characters"
+                    minlength="8" maxlength="72" autocomplete="new-password" required>
+
+                <div id="registerError" class="form-error" role="alert"></div>
+
+                <button id="registerButton" class="btn btn-primary btn-full" type="submit">
+                    Create account <span aria-hidden="true">→</span>
+                </button>
+
+                <p class="auth-switch">
+                    Already have an account?
+                    <button type="button" id="showLoginButton" class="text-button">
+                        Sign in
+                    </button>
+                </p>
             </form>
 
             <div class="auth-footer">
@@ -190,11 +273,15 @@
                                 </div>
                             </div>
                             <div class="progress-legend">
-                                <div><i class="legend-dot green-dot"></i> Patient confirmed <strong id="progressPatient">0</strong></div>
-                                <div><i class="legend-dot blue-dot"></i> Caregiver confirmed <strong id="progressCaregiver">0</strong></div>
-                                <div><i class="legend-dot gray-dot"></i> Remaining <strong id="progressRemaining">0</strong></div>
+                                <div><i class="legend-dot green-dot"></i> Patient confirmed <strong
+                                        id="progressPatient">0</strong></div>
+                                <div><i class="legend-dot blue-dot"></i> Caregiver confirmed <strong
+                                        id="progressCaregiver">0</strong></div>
+                                <div><i class="legend-dot gray-dot"></i> Remaining <strong
+                                        id="progressRemaining">0</strong></div>
                             </div>
-                            <p class="helper-note">A confirmation records who reported taking a dose. It does not independently verify medication intake.</p>
+                            <p class="helper-note">A confirmation records who reported taking a dose. It does not
+                                independently verify medication intake.</p>
                         </article>
                     </div>
 
@@ -313,4 +400,5 @@
 
     <script src="/static/js/app.js"></script>
 </body>
+
 </html>

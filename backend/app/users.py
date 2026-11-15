@@ -102,19 +102,21 @@ def invite_member(
 
 def accept_invitation(
     invitation_token: str,
+    email: str,
     passcode: str,
     db: Session,
 ):
-    """Accept an invitation and establish the member's passcode."""
+    """Accept an invitation after verifying its token and invited email."""
 
-    if not invitation_token or not passcode:
+    if not invitation_token or not email or not passcode:
         raise HTTPException(
             status_code=400,
-            detail="Invitation token and passcode are required.",
+            detail="Invitation code, email and passcode are required.",
         )
 
     member = db.query(CareMember).filter(
         CareMember.invitation_token_hash == _hash_token(invitation_token),
+        CareMember.email == email.strip().lower(),
         CareMember.invitation_status == "pending",
         CareMember.is_active.is_(False),
     ).first()
@@ -122,14 +124,17 @@ def accept_invitation(
     if not member:
         raise HTTPException(
             status_code=400,
-            detail="Invalid or already-used invitation.",
+            detail="Invalid invitation code or email address.",
         )
 
     now = datetime.now(timezone.utc)
     expiry = member.invitation_expires_at
 
     if expiry is None:
-        raise HTTPException(status_code=400, detail="Invitation has no expiry.")
+        raise HTTPException(
+            status_code=400,
+            detail="Invitation has no expiry.",
+        )
 
     if expiry.tzinfo is None:
         expiry = expiry.replace(tzinfo=timezone.utc)
@@ -242,26 +247,32 @@ def revoke_member_access(
 def authenticate_member(
     email: str,
     passcode: str,
-    patient_id: int,
     db: Session,
 ):
-    """Verify an accepted member's identity and passcode."""
+    """Authenticate an accepted member using email and passcode."""
 
-    member = db.query(CareMember).filter(
+    members = db.query(CareMember).filter(
         CareMember.email == email.strip().lower(),
-        CareMember.patient_id == patient_id,
         CareMember.is_active.is_(True),
         CareMember.invitation_status == "accepted",
-    ).first()
+    ).all()
 
-    if (
-        not member
-        or not member.passcode_hash
-        or not verify_passcode(passcode, member.passcode_hash)
-    ):
+    matching_members = [
+        member for member in members
+        if member.passcode_hash
+        and verify_passcode(passcode, member.passcode_hash)
+    ]
+
+    if not matching_members:
         raise HTTPException(
             status_code=401,
             detail="Invalid email or passcode.",
         )
 
-    return member
+    if len(matching_members) > 1:
+        raise HTTPException(
+            status_code=409,
+            detail="Multiple care connections match these credentials. Contact the patient.",
+        )
+
+    return matching_members[0]
