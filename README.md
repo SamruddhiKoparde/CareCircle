@@ -124,9 +124,8 @@ python -m pytest -v
 
 ## Project Links
 
-- **GitHub Repository:** To be added
-- **Live Application:** To be added
-- **Project Presentation:** To be added
+- **GitHub Repository:** https://github.com/SamruddhiKoparde/CareCircle
+- **Live Application:** (https://carecircle-4im8.onrender.com/)
 
 ## Future Improvements
 
