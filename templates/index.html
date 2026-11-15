@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f8f7">
+    <meta name="description" content="CareCircle — connected, compassionate care for every day.">
+    <title>CareCircle | Connected Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <!-- Authentication -->
+    <main id="authScreen" class="auth-screen">
+        <section class="auth-brand">
+            <div class="brand-logo">C</div>
+            <span>CareCircle</span>
+        </section>
+
+        <section class="auth-content">
+            <div class="auth-heading">
+                <span class="eyebrow">CONNECTED CARE, EVERY DAY</span>
+                <h1>Care feels better<br>when we're connected.</h1>
+                <p>A calmer way to manage medication, appointments and the people who care.</p>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+                <h2>Welcome back</h2>
+                <p>Sign in to your care account.</p>
+
+                <label for="loginEmail">Email address</label>
+                <input id="loginEmail" name="email" type="email"
+                    placeholder="you@example.com" autocomplete="username" required>
+
+                <label for="loginPasscode">Passcode</label>
+                <input id="loginPasscode" name="passcode" type="password"
+                    placeholder="Enter your passcode" autocomplete="current-password"
+                    minlength="8" required>
+
+                <div id="loginError" class="form-error" role="alert"></div>
+
+                <button id="loginButton" class="btn btn-primary btn-full" type="submit">
+                    Sign in <span aria-hidden="true">→</span>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Your care information is personal. Access is protected by your account.
+            </div>
+        </section>
+
+        <aside class="auth-visual">
+            <div class="visual-orbit orbit-one"></div>
+            <div class="visual-orbit orbit-two"></div>
+            <div class="visual-message">
+                <span class="visual-symbol">♡</span>
+                <h2>Better care.<br>Stronger together.</h2>
+                <p>One shared space for the everyday moments that matter.</p>
+            </div>
+            <div class="visual-bottom">PATIENT-CONTROLLED CARE COORDINATION</div>
+        </aside>
+    </main>
+
+    <!-- Application -->
+    <div id="appScreen" class="app-shell hidden">
+
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">C</div>
+                <div>
+                    <strong>CareCircle</strong>
+                    <small>CONNECTED CARE</small>
+                </div>
+            </div>
+
+            <div class="nav-caption">WORKSPACE</div>
+            <nav class="main-nav" aria-label="Main navigation">
+                <button class="nav-item active" data-page="overview">
+                    <span>⌂</span> Overview
+                </button>
+                <button class="nav-item" data-page="medications">
+                    <span>✚</span> Medications
+                </button>
+                <button class="nav-item" data-page="appointments">
+                    <span>▦</span> Appointments
+                </button>
+                <button class="nav-item" data-page="care-team">
+                    <span>♧</span> Care team
+                </button>
+                <button class="nav-item" data-page="activity">
+                    <span>◷</span> Activity
+                </button>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-help">
+                    <span>♡</span>
+                    <strong>Care is a team effort.</strong>
+                    <p>Keep your trusted people connected.</p>
+                </div>
+                <button id="logoutButton" class="logout-button">
+                    <span>↪</span> Sign out
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <button id="menuButton" class="mobile-menu" aria-label="Open navigation">☰</button>
+                <div class="breadcrumb">CareCircle <span>/</span> <strong id="breadcrumbPage">Overview</strong></div>
+                <div class="topbar-right">
+                    <span class="connection-indicator"><i></i> Connected</span>
+                    <div class="user-avatar" id="userAvatar">P</div>
+                    <div class="user-summary">
+                        <strong id="userName">Patient</strong>
+                        <small id="userRole">Patient account</small>
+                    </div>
+                </div>
+            </header>
+
+            <section class="page-container">
+
+                <!-- Overview -->
+                <section id="page-overview" class="page active">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow" id="todayDate">YOUR CARE AT A GLANCE</span>
+                            <h1 id="greeting">Good day</h1>
+                            <p>Here's what's happening with your care today.</p>
+                        </div>
+                        <button class="btn btn-secondary" id="refreshDashboard">↻ Refresh</button>
+                    </div>
+
+                    <div class="metric-grid">
+                        <article class="metric-card">
+                            <div class="metric-icon mint">✚</div>
+                            <span>Active medications</span>
+                            <strong id="metricMedications">—</strong>
+                            <small>Currently active</small>
+                        </article>
+                        <article class="metric-card">
+                            <div class="metric-icon blue">◷</div>
+                            <span>Doses today</span>
+                            <strong id="metricDoses">—</strong>
+                            <small>Scheduled for today</small>
+                        </article>
+                        <article class="metric-card">
+                            <div class="metric-icon green">✓</div>
+                            <span>Confirmed</span>
+                            <strong id="metricConfirmed">—</strong>
+                            <small>Patient and caregiver</small>
+                        </article>
+                        <article class="metric-card">
+                            <div class="metric-icon amber">!</div>
+                            <span>Needs attention</span>
+                            <strong id="metricAttention">—</strong>
+                            <small>Awaiting or missed</small>
+                        </article>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <article class="panel medication-panel">
+                            <div class="panel-heading">
+                                <div>
+                                    <h2>Today's medications</h2>
+                                    <p>Your daily medication schedule.</p>
+                                </div>
+                                <button class="text-button" data-page="medications">View all →</button>
+                            </div>
+                            <div id="todayMedicationList" class="medication-list">
+                                <div class="loading-state">Loading medication schedule...</div>
+                            </div>
+                        </article>
+
+                        <article class="panel progress-panel">
+                            <div class="panel-heading">
+                                <div>
+                                    <h2>Daily progress</h2>
+                                    <p>Confirmation overview</p>
+                                </div>
+                            </div>
+                            <div class="progress-circle" id="progressCircle">
+                                <div>
+                                    <strong id="progressPercent">0%</strong>
+                                    <small>confirmed</small>
+                                </div>
+                            </div>
+                            <div class="progress-legend">
+                                <div><i class="legend-dot green-dot"></i> Patient confirmed <strong id="progressPatient">0</strong></div>
+                                <div><i class="legend-dot blue-dot"></i> Caregiver confirmed <strong id="progressCaregiver">0</strong></div>
+                                <div><i class="legend-dot gray-dot"></i> Remaining <strong id="progressRemaining">0</strong></div>
+                            </div>
+                            <p class="helper-note">A confirmation records who reported taking a dose. It does not independently verify medication intake.</p>
+                        </article>
+                    </div>
+
+                    <div class="dashboard-grid lower-grid">
+                        <article class="panel">
+                            <div class="panel-heading">
+                                <div>
+                                    <h2>Upcoming appointments</h2>
+                                    <p>Your next scheduled visits.</p>
+                                </div>
+                                <button class="text-button" data-page="appointments">View all →</button>
+                            </div>
+                            <div id="dashboardAppointments" class="appointment-list">
+                                <div class="empty-state">Loading appointments...</div>
+                            </div>
+                        </article>
+
+                        <article class="panel">
+                            <div class="panel-heading">
+                                <div>
+                                    <h2>Recent activity</h2>
+                                    <p>Latest updates from your care circle.</p>
+                                </div>
+                                <button class="text-button" data-page="activity">View all →</button>
+                            </div>
+                            <div id="dashboardActivity" class="activity-list">
+                                <div class="empty-state">Loading activity...</div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <!-- Medications -->
+                <section id="page-medications" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">YOUR TREATMENT PLAN</span>
+                            <h1>Medications</h1>
+                            <p>Keep track of schedules and dose confirmations.</p>
+                        </div>
+                        <button id="addMedicationButton" class="btn btn-primary">+ Add medication</button>
+                    </div>
+                    <div class="panel">
+                        <div id="medicationFullList" class="table-container">
+                            <div class="loading-state">Loading medications...</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Appointments -->
+                <section id="page-appointments" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">PLAN AHEAD</span>
+                            <h1>Appointments</h1>
+                            <p>Keep upcoming visits and care details in one place.</p>
+                        </div>
+                        <button id="addAppointmentButton" class="btn btn-primary">+ Add appointment</button>
+                    </div>
+                    <div class="panel">
+                        <div id="appointmentFullList">
+                            <div class="loading-state">Loading appointments...</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Care team -->
+                <section id="page-care-team" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">YOUR TRUSTED SUPPORT</span>
+                            <h1>Care team</h1>
+                            <p>People you've invited to participate in your care.</p>
+                        </div>
+                        <button id="inviteMemberButton" class="btn btn-primary">+ Invite member</button>
+                    </div>
+                    <div class="panel">
+                        <div id="careTeamList">
+                            <div class="loading-state">Loading care team...</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Activity -->
+                <section id="page-activity" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">CARE HISTORY</span>
+                            <h1>Activity</h1>
+                            <p>A record of important actions and confirmations.</p>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div id="fullActivityList">
+                            <div class="loading-state">Loading activity...</div>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modalBackdrop" class="modal-backdrop hidden">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-heading">
+                <h2 id="modalTitle">Add details</h2>
+                <button id="closeModal" class="modal-close" aria-label="Close dialog">×</button>
+            </div>
+            <div id="modalContent"></div>
+        </section>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
